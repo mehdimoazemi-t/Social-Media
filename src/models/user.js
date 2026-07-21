@@ -1,8 +1,8 @@
 
-const mogoose = require("mongoose");
+const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
-const schema = mogoose.Schema({
+const schema = mongoose.Schema({
     username: {
         type: String,
         unique: true,
@@ -28,7 +28,7 @@ const schema = mogoose.Schema({
     bio: {
         type: String,
     },
-    privet: {
+    private: {
         type: Boolean,
         default: false
     },
@@ -48,7 +48,9 @@ const schema = mogoose.Schema({
 
 const model = mongoose.model("User", schema);
 
-mongoose.pre("save", async (next) => {
+
+//  Password Hashing Middleware
+schema.pre("save", async function (next) {
 
     try {
         this.password = await bcrypt.hash(this.password, 10)
@@ -56,7 +58,6 @@ mongoose.pre("save", async (next) => {
     } catch (error) {
         next(error)
     }
-
 })
 
-module.exports = { model, schema }
+module.exports =  model 
