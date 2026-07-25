@@ -1,81 +1,61 @@
+
+
 const { errorRespone } = require("../utils/response");
 
-const errorHandling = (schema) => {
-
+const errorHandling = (schema, route) => {
     return async (req, res, next) => {
-
         try {
-
             const { error } = await schema.validate(req.body, { abortEarly: false });
 
             if (error) {
 
-                const errObject = error.details.reduce((initialValue, currentValue) => {
+                const errorMessages = error.details.map(detail => {
+                    const field = detail.path[0];
+                    let message = "";
 
-                    let errType = currentValue.type
-
-                    switch (errType) {
-
+                    switch (detail.type) {
                         case "string.email":
-                            initialValue[currentValue.path[0]] = "Please enter a valid email address."
-
+                            message = "Please enter a valid email address.";
                             break;
-
                         case "any.required":
-                            initialValue[currentValue.path[0]] = "The field is required and has not been filled in."
-
+                            message = `${field.charAt(0).toUpperCase() + field.slice(1)} is required.`;
                             break;
-
-                        case "any.required":
-                            initialValue[currentValue.path[0]] = "The field is required and has not been filled in."
-
-                            break;
-
                         case "string.min":
-                            initialValue[currentValue.path[0]] = "The string length is less than the allowed limit."
-
+                            message = `${field.charAt(0).toUpperCase() + field.slice(1)} is too short.`;
                             break;
-
+                        case "string.max":
+                            message = `${field.charAt(0).toUpperCase() + field.slice(1)} is too long.`;
+                            break;
                         case "number.base":
-                            initialValue[currentValue.path[0]] = "The input must be a number."
-
+                            message = "Input must be a number.";
                             break;
-
-
-                        case "number.base":
-                            initialValue[currentValue.path[0]] = "The input must be a number."
-
-                            break;
-
-
                         case "any.only":
-                            initialValue[currentValue.path[0]] = "Please select a valid value"
-
+                            message = "Please select a valid option.";
                             break;
-
-
                         default:
-
-                            initialValue[currentValue.path[0]] = currentValue.message
-
+                            message = detail.message;
                     }
+                    return message;
+                });
 
-                    return initialValue
-                    
-                }, {})
+                const finalErrorMessage = errorMessages.join(" | ");
 
-                return errorRespone(res, 400, {
-                    error: errObject
-                })
+                req.flash("error", finalErrorMessage);
+
+                return res.redirect(route);
             }
 
-            next()
-
+            next();
         } catch (error) {
-            next(error)
+            return errorRespone(res, 500, {
+                error: {
+                    message: error.message || "Internal Server Error",
+                }
+            });
         }
-    }
-}
+    };
+};
+
+module.exports = errorHandling;
 
 
-module.exports = errorHandling
