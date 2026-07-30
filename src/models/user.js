@@ -1,6 +1,7 @@
 
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
+const { errorRespone } = require("../utils/response");
 
 const schema = mongoose.Schema({
     username: {
@@ -20,6 +21,7 @@ const schema = mongoose.Schema({
     },
     name: {
         type: String,
+        required: false
     },
     profilePicture: {
         type: String,
@@ -46,18 +48,19 @@ const schema = mongoose.Schema({
 
 }, { timestamps: true });
 
-const model = mongoose.model("User", schema);
-
 
 //  Password Hashing Middleware
-schema.pre("save", async function (next) {
+schema.pre("save", async function () {
 
     try {
         this.password = await bcrypt.hash(this.password, 10)
-        next()
     } catch (error) {
-        next(error)
+        throw new Error("someting went werong")
     }
 })
 
-module.exports =  model 
+
+const model = mongoose.model("User", schema);
+
+
+module.exports = model 

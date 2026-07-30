@@ -26,12 +26,16 @@ const errorHandling = (schema, route) => {
                         case "string.max":
                             message = `${field.charAt(0).toUpperCase() + field.slice(1)} is too long.`;
                             break;
+                        case "string.empty":
+                            message = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+                            break
                         case "number.base":
                             message = "Input must be a number.";
                             break;
                         case "any.only":
                             message = "Please select a valid option.";
                             break;
+
                         default:
                             message = detail.message;
                     }
