@@ -1,19 +1,19 @@
 const userModel = require("../models/user")
 const followModel = require("../models/Follow")
 
-const hasAccessProfile = async (currentUserName, targetUserName) => {
+const hasAccessProfile = async (currentUserId, targetUserId) => {
 
-    const page = await userModel.findOne({ username: targetUserName })
+    const page = await userModel.findOne({ _id: targetUserId })
 
     if (!page) return "page not found"
 
-    if (currentUserName == targetUserName) return true
+    if (currentUserId == targetUserId) return true
 
     if (!page.private) return true
 
     const follow = await followModel.findOne({
-        following: page.username,
-        followers: currentUserName
+        following: page._id,
+        followers: currentUserId
     })
 
     if (page.private && !follow) return false
