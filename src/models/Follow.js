@@ -4,15 +4,15 @@ const mongoose = require("mongoose")
 
 const schema = mongoose.Schema({
     following: {
-        type: String,
+        type: mongoose.Types.ObjectId,
         required: true
     },
     followers: {
-        type: String,
+        type: mongoose.Types.ObjectId,
         required: true
     }
 }, { timestamps: true })
 
 const model = mongoose.model("Follow", schema)
 
-module.exports = model
+module.exports = model  
