@@ -1,7 +1,12 @@
 const userModel = require("../models/user")
 const followModel = require("../models/Follow")
+const mongoose = require("mongoose")
 
 const hasAccessProfile = async (currentUserId, targetUserId) => {
+
+    const isValidId = mongoose.isValidObjectId(targetUserId)
+
+    if (!isValidId) return "ObjectId is not valid"
 
     const page = await userModel.findOne({ _id: targetUserId })
 

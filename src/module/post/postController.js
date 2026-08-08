@@ -31,7 +31,7 @@ exports.createPost = async (req, res, next) => {
         post = await post.save()
 
         req.flash("success", "Post Uploaded Successfully")
-        return res.render("post/upload")
+        return res.redirect(`/page/${req.user._id}`)
 
     } catch (error) {
         next(error)

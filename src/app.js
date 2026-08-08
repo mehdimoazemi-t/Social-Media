@@ -9,6 +9,8 @@ const cookieParser = require("cookie-parser")
 
 const authRouter = require("./module/auth/authRouter")
 const postRouter = require("./module/post/postRouter")
+const pageRouter = require("./module/pages/pageRouter")
+const editProfileRouter = require("./module/edit-profile/editRouter")
 
 const app = express()
 
@@ -58,6 +60,9 @@ app.get("/", (req, res) => {
 
 app.use("/auth", authRouter)
 app.use("/post", postRouter)
+app.use("/page", pageRouter)
+app.use("/edit", editProfileRouter)
+
 
 
 
@@ -71,6 +76,5 @@ app.use((req, res) => {
     })
 
 })
-
 
 module.exports = app

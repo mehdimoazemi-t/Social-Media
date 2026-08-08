@@ -2,6 +2,7 @@ const { required } = require("joi")
 const mongoose = require("mongoose")
 
 const schema = mongoose.Schema({
+
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -15,17 +16,12 @@ const schema = mongoose.Schema({
         type: String,
         required: false,
     },
-    like: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User"
-        }
-    ],
     tags: {
         type: [String],
         required: false
     }
-})
+
+}, { timestamps: true })
 
 const model = mongoose.model("Post", schema)
 

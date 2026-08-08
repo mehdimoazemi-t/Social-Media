@@ -2,7 +2,7 @@ const multer = require("multer")
 const path = require("path")
 const fs = require("fs")
 
-const multerUploader = ( destination, allowedTypes = /jpg|jpeg|png|WebP/) => {
+const multerUploader = (destination, allowedTypes = /jpg|jpeg|png|WebP|mkv/) => {
 
     if (!fs.existsSync(destination)) {
         fs.mkdirSync(destination)
@@ -22,13 +22,15 @@ const multerUploader = ( destination, allowedTypes = /jpg|jpeg|png|WebP/) => {
 
 
     const fileFilter = (req, file, cb) => {
+        
         const type = file.mimetype
 
         if (allowedTypes.test(type)) {
             cb(null, true)
-        }
-        cb(new Error("Invalid file type. Only JPG, JPEG, PNG, and WebP are allowed"), false)
+        } else {
 
+            cb(new Error("Invalid file type. Only JPG, JPEG, PNG, MP4,MKV, and WebP are allowed"), false)
+        }
     }
 
 
