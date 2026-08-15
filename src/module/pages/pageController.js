@@ -1,6 +1,7 @@
 const hasAccessProfile = require("../../utils/hasAccessProfile")
 const followModel = require("../../models/Follow")
 const userModel = require("../../models/user")
+const likeModel = require("../../models/Like")
 const { name } = require("ejs")
 const { errorRespone } = require("../../utils/response")
 const postModel = require("../../models/Post")
@@ -33,9 +34,15 @@ exports.getPage = async (req, res, next) => {
         })
 
 
-        const userInfo = await userModel.findOne({ _id: userId })
+        const userInfo = await userModel.findOne({ _id: userId }).lean()
         const userPosts = await postModel.find({ user: userId }).lean()
-        console.log(userPosts);
+        const likes = await likeModel.find({ user: user._id }).lean()
+
+
+        let postWithLike = userPosts.map(post => {
+            const isLiked = likes.some(like => like.post.toString() == post._id.toString())
+            return { ...post, hasLike: isLiked }
+        })
 
 
         if (!isAccess) {
@@ -74,7 +81,7 @@ exports.getPage = async (req, res, next) => {
             userId,
             userInfo,
             following,
-            posts: userPosts,
+            posts: postWithLike,
             followers,
             isAccess,
             isOwnProfile: user._id == userId ? true : false
