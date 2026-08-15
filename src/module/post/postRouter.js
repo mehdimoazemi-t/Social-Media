@@ -19,4 +19,12 @@ router.route("/upload")
     .post(auth, errorHandling(postValidateSchema, "/post/upload"), uploader.single("media"), postController.createPost)
 
 
+router.route("/like")
+    .post(auth, postController.like)
+
+router.route("/dislike")
+    .post(auth, postController.dislike)
+
+
 module.exports = router
+
