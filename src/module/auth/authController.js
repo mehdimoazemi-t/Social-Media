@@ -96,7 +96,7 @@ exports.login = async (req, res, next) => {
 
         const user = await userModel.findOne({ email })
 
-        console.log(user.password);
+
         if (!user) {
             req.flash("error", "User Not Found")
             return res.redirect("/auth/login")
@@ -118,7 +118,6 @@ exports.login = async (req, res, next) => {
         })
 
 
-
         const refreshToken = await refreshTokenModel.createRefreshToken(user)
         res.cookie("refresh-token", refreshToken.refreshToken, {
             httpOnly: true,
@@ -131,3 +130,36 @@ exports.login = async (req, res, next) => {
         next(error)
     }
 }
+
+
+
+exports.refreshToken = async (req, res, next) => {
+    try {
+
+        const { token } = req.body
+
+        const userId = await refreshTokenModel.verifyRefreshToken(token)
+
+        if (!userId) {
+            return errorRespone(res, 401, { message: "Refresh token is invalid or expired. Please login again." })
+        }
+
+
+        const accessToken = jwt.sign({ userId }, process.env.JWT_SECRET_KEY)
+
+        res.cookie("access-token", accessToken, {
+            httpOnly: true,
+            maxAge: 2 * 1000 * 20
+        })
+
+        return successfullyRespone(res, 200, { message: "Token Refreshed Successfully" })
+
+
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+
+
