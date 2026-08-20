@@ -1,11 +1,13 @@
-const errorHandling = require("../../middleware/errorHandling");
-const userModel = require("../../models/user");
-const { successfullyRespone, errorRespone } = require("../../utils/response");
+const errorHandling = require("../../middleware/errorHandling")
+const userModel = require("../../models/user")
+const { successfullyRespone, errorRespone } = require("../../utils/response")
 const authValidateSchema = require("./authValidator");
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
 const refreshTokenModel = require("../../models/RefreshToken")
-
+const nodemailer = require("nodemailer")
+const { v4: uuidv4 } = require("uuid")
+const ResetPasswordModel = require("./../../models/ResetPassword")
 
 
 exports.showViewRegister = (req, res) => {
@@ -162,4 +164,85 @@ exports.refreshToken = async (req, res, next) => {
 
 
 
+exports.showForgetPasswordView = async (req, res, next) => {
+    try {
+        return res.render("auth/forget-password")
+    } catch (error) {
+        next(error)
+    }
+}
 
+exports.showResetPasswordView = async (req, res, next) => {
+    try {
+        return res.render("auth/reset-password")
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+exports.forgetPassword = async (req, res, next) => {
+    try {
+
+        const { email } = req.body
+
+        //  Validate Email 
+
+        const user = await userModel.findOne({ email })
+
+        if (!user) {
+            req.flash("error", "user not found")
+            return res.redirect("back")
+        }
+
+        const expireTime = Date.now() + 1000 * 60 * 60
+        const token = uuidv4()
+
+
+
+        await ResetPasswordModel.create({
+            user: user._id,
+            token,
+            expireTime
+        })
+
+
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_APP_PASSWORD
+            }
+        })
+
+        const nodemailerOption = {
+            from: `"Support Team" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: "Reset Password",
+            html: `
+    <h2>Hi ${user.name}</h2>
+    <p>Please click the link below to reset your password:</p>
+    <a href="http://localhost:3000/auth/forget-password/${token}">Reset Password</a>
+    <p>This link will expire in 1 hour.</p>`
+        }
+
+
+        await transporter.sendMail(nodemailerOption)
+
+        req.flash("success", "email send successfully")
+        res.redirect("back")
+
+
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+// exports.resetPassword = async (req, res, next) => {
+//     try {
+
+//     } catch (error) {
+//         error(next)
+//     }
+// }
